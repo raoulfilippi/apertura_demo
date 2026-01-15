@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calendario Prenotazioni Casa Mare</title>
 
-  <!-- FullCalendar CSS -->
+  <!-- FullCalendar CSS compatibile -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.css" rel="stylesheet">
 
   <style>
@@ -19,7 +19,7 @@
 <h1>Calendario Prenotazioni Casa Mare</h1>
 <div id="calendar"></div>
 
-<!-- Firebase compatibile (non modulare) -->
+<!-- Firebase compatibile -->
 <script src="https://www.gstatic.com/firebasejs/8.16.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.16.0/firebase-firestore.js"></script>
 
@@ -42,42 +42,36 @@
   var db = firebase.firestore();
 
   // Funzione per caricare prenotazioni e creare eventi
-  function loadCalendar() {
-    db.collection("prenotazioni casa mare").get().then(snapshot => {
-      var events = [];
-      snapshot.forEach(doc => {
-        var data = doc.data();
+  db.collection("prenotazioni casa mare").get().then(snapshot => {
+    var events = [];
+    snapshot.forEach(doc => {
+      var data = doc.data();
+      // FullCalendar esclude il giorno finale, quindi aggiungiamo 1 giorno
+      var endDate = new Date(data.data_fine);
+      endDate.setDate(endDate.getDate() + 1);
 
-        // FullCalendar esclude il giorno finale, quindi aggiungiamo 1 giorno
-        var endDate = new Date(data.data_fine);
-        endDate.setDate(endDate.getDate() + 1);
-
-        events.push({
-          title: data.nome,
-          start: data.data_inizio,
-          end: endDate.toISOString().split('T')[0],
-          color: 'red'
-        });
+      events.push({
+        title: data.nome,
+        start: data.data_inizio,
+        end: endDate.toISOString().split('T')[0],
+        color: 'red'
       });
-
-      var calendarEl = document.getElementById('calendar');
-      var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        events: events,
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: ''
-        }
-      });
-      calendar.render();
-    }).catch(err => {
-      console.error("Errore caricamento prenotazioni:", err);
     });
-  }
 
-  // Avvia il calendario
-  loadCalendar();
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      events: events,
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: ''
+      }
+    });
+    calendar.render();
+  }).catch(err => {
+    console.error("Errore caricamento prenotazioni:", err);
+  });
 </script>
 
 </body>
