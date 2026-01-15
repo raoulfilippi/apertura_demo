@@ -1,594 +1,81 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Strumenti</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                    colors: {
-                        'primary': '#0078D4',
-                        'primary-dark': '#106EBE',
-                        'secondary': '#F8FAFC',
-                        'success': '#10B981',
-                        'warning': '#F59E0B',
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-in-out',
-                        'slide-up': 'slideUp 0.3s ease-out',
-                        'pulse-soft': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideUp {
-            from { transform: translateY(10px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario Prenotazioni Casa Mare</title>
+
+  <!-- FullCalendar CSS -->
+  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #calendar { max-width: 900px; margin: 0 auto; }
+  </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+<body>
 
-    <!-- Dashboard Main Container -->
-    <div id="dashboard-container" class="bg-white rounded-xl shadow-lg p-8 w-full max-w-xl text-center transition-opacity duration-500 ease-in-out animate-fade-in">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Dashboard Strumenti</h1>
-        <p class="text-gray-600 mb-8">Seleziona lo strumento che vuoi utilizzare.</p>
-        <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <button id="show-demo-btn" class="flex-1 px-8 py-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 text-lg">
-                Richiesta Demo 🚀
-            </button>
-            <button id="show-credentials-btn" class="flex-1 px-8 py-4 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-200 text-lg">
-                Invia Credenziali 📧
-            </button>
-        </div>
-    </div>
+<h1>Calendario Prenotazioni Casa Mare</h1>
+<div id="calendar"></div>
 
-    <!-- Richiesta Demo Tool Container -->
-    <div id="demo-tool-container" class="hidden bg-white rounded-xl shadow-lg p-8 w-full max-w-lg transition-opacity duration-500 ease-in-out">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Generatore Email Richiesta DEMO</h1>
-        <p class="text-gray-600 mb-8 text-center">
-            Inserisci i dettagli del cliente e copia l'email precompilata.
-        </p>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
 
-        <!-- Input Fields -->
-        <div class="mb-5">
-            <label for="clientName" class="block text-sm font-medium text-gray-700 mb-1">Nome Cliente</label>
-            <input type="text" id="clientName" placeholder="Es. Pfizer" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
-        </div>
-        <div class="mb-5">
-            <label for="country" class="block text-sm font-medium text-gray-700 mb-1">Nazione</label>
-            <input type="text" id="country" placeholder="Es. Australia" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
-        </div>
+<!-- FullCalendar JS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js'></script>
 
-        <!-- Dropdowns in row -->
-        <div class="flex flex-col sm:flex-row gap-4 mb-8">
-            <div class="flex-1">
-                <label for="expirationPeriod" class="block text-sm font-medium text-gray-700 mb-1">Periodo di Scadenza</label>
-                <select id="expirationPeriod" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                </select>
-            </div>
-            <div class="flex-1">
-                <label for="courseOption" class="block text-sm font-medium text-gray-700 mb-1">Selezione Corsi</label>
-                <select id="courseOption" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200">
-                    <option value="XTREMA">XTREMA</option>
-                    <option value="INJECTA">INJECTA</option>
-                </select>
-            </div>
-        </div>
+<script>
+  // 🔹 Inserisci qui la tua configurazione Firebase
+  const firebaseConfig = {
+    apiKey: "API_KEY",
+    authDomain: "PROJECT_ID.firebaseapp.com",
+    projectId: "PROJECT_ID",
+    storageBucket: "PROJECT_ID.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+  };
 
-        <!-- Buttons Container -->
-        <div class="flex flex-col sm:flex-row gap-4">
-            <button id="createAndOpenBtn" class="flex-1 px-6 py-3 bg-green-600 text-sm text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200">
-                Copia Email e Apri Link
-            </button>
-            <button id="copySubjectBtn" class="flex-1 px-6 py-3 bg-blue-600 text-sm text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
-                Copia Oggetto
-            </button>
-        </div>
-        <button id="back-to-dashboard-demo" class="mt-4 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors duration-200">
-            Torna alla Dashboard
-        </button>
+  // Inizializza Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-        <!-- Confirmation Message -->
-        <div id="message" class="mt-6 text-center text-sm font-medium text-green-700 opacity-0 transition-opacity duration-300"></div>
+  // Funzione per leggere prenotazioni e costruire eventi per il calendario
+  async function loadCalendar() {
+    const snapshot = await db.collection("prenotazioni casa mare").get();
+    const events = [];
 
-    </div>
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      // FullCalendar esclude il giorno di fine, quindi aggiungiamo 1 giorno
+      const endDate = new Date(data.data_fine);
+      endDate.setDate(endDate.getDate() + 1);
 
-    <!-- Invia Credenziali Tool Container -->
-    <div id="credentials-tool-container" class="hidden bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-white/20 w-full max-w-2xl animate-fade-in">
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-2xl mb-4">
-                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-            </div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                Generatore Email Credenziali
-            </h1>
-            <p class="text-gray-600 max-w-md mx-auto">
-                Crea e invia facilmente le credenziali di accesso per la demo di IMA SkillGate.
-            </p>
-        </div>
+      events.push({
+        title: data.nome,
+        start: data.data_inizio,
+        end: endDate.toISOString().split('T')[0],
+        color: 'red' // evidenzia come occupato
+      });
+    });
 
-        <form id="emailForm" class="space-y-6">
-            <div class="space-y-2">
-                <label for="to" class="flex items-center text-gray-700 font-medium">
-                    <svg class="w-4 h-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
-                    </svg>
-                    Email destinatari
-                </label>
-                <input type="email" id="to" placeholder="esempio@azienda.com, altro@email.it" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 hover:border-gray-300" multiple required>
-                <p class="text-sm text-gray-500">Separa più email con virgole o spazi</p>
-                <div id="email-error" class="text-red-500 text-sm hidden"></div>
-            </div>
+    // Inizializza il calendario
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      events: events,
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: ''
+      }
+    });
+    calendar.render();
+  }
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label for="username" class="flex items-center text-gray-700 font-medium">
-                        <svg class="w-4 h-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-       <!-- L'etichetta del testo è ora un link -->
-            <a href="https://portal.ima.it/areaprocess/AR-0003D01/private/_layouts/15/WopiFrame2.aspx?sourcedoc={C732A4A8-0F17-4C9F-A7A6-1B843AAD9A29}&file=Account%20generici%20%20IMA%20SkillGate%26SSS.xlsx&action=default" target="_blank" class="font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200">
-                Username (clicca per salvare)
-            </a>
-                    </label>
-                    <input type="text" id="username" placeholder="demo_user" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 hover:border-gray-300" required>
-                </div>
+  // Avvia la funzione
+  loadCalendar();
+</script>
 
-                <div class="space-y-2">
-                    <label for="password" class="flex items-center text-gray-700 font-medium">
-                        <svg class="w-4 h-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m-2-2a2 2 0 00-2 2m2-2h.01M9 9h.01m-.01 4h.01m4.99 0h.01M15 11a2 2 0 01-2 2m0 0a2 2 0 01-2-2m2 2v.01"/>
-                        </svg>
-                        Password
-                    </label>
-                    <input type="text" id="password" placeholder="demo123" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 hover:border-gray-300" required>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label for="language" class="flex items-center text-gray-700 font-medium">
-                        <svg class="w-4 h-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
-                        </svg>
-                        Lingua
-                    </label>
-                    <select id="language" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 hover:border-gray-300 bg-white">
-                        <option value="eng" selected>🇬🇧 English</option>
-                        <option value="ita">🇮🇹 Italiano</option>
-                        <option value="spa">🇪🇸 Español</option>
-                        <option value="fra">🇫🇷 Français</option>
-                        <option value="deu">🇩🇪 Deutsch</option>
-                    </select>
-                </div>
-
-                <div class="space-y-2">
-                    <label for="expirationDate" class="flex items-center text-gray-700 font-medium">
-                        <svg class="w-4 h-4 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                        Data scadenza
-                    </label>
-                    <input type="date" id="expirationDate" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 hover:border-gray-300">
-                </div>
-            </div>
-
-            <div id="preview-section" class="hidden bg-gray-50 rounded-xl p-6 border-2 border-dashed border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                    <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                    Anteprima Email
-                </h3>
-                <div id="email-preview" class="bg-white rounded-lg p-4 text-sm text-gray-700 max-h-96 overflow-y-auto border border-gray-200 shadow-inner"></div>
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-3 pt-4">
-                <button type="button" onclick="showPreview()" class="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold rounded-xl transition-all duration-200 flex items-center justify-center group">
-                    <svg class="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                    Anteprima
-                </button>
-                <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center group">
-                    <svg class="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                    </svg>
-                    Genera e Invia Email
-                </button>
-            </div>
-            <button id="back-to-dashboard-credentials" class="mt-4 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors duration-200">
-                Torna alla Dashboard
-            </button>
-        </form>
-    </div>
-    
-    <!-- Modal istruzioni -->
-    <div id="instructions-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 animate-slide-up">
-            <div class="bg-gradient-to-r from-primary to-primary-dark text-white p-6 rounded-t-2xl">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="text-xl font-bold">Ultimo passaggio</h2>
-                        <p class="text-white/80 text-sm">Allega il file PDF in Outlook</p>
-                    </div>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="space-y-4">
-                    <div class="flex items-start space-x-3">
-                        <div class="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <span class="text-xs font-bold text-primary">1</span>
-                        </div>
-                        <p class="text-gray-700">Outlook si aprirà automaticamente con l'email precompilata</p>
-                    </div>
-                    <div class="flex items-start space-x-3">
-                        <div class="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <span class="text-xs font-bold text-primary">2</span>
-                        </div>
-                        <p class="text-gray-700">Clicca sull'icona della graffetta per allegare file</p>
-                    </div>
-                    <div class="flex items-start space-x-3">
-                        <div class="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <span class="text-xs font-bold text-primary">3</span>
-                        </div>
-                        <div>
-                            <p class="text-gray-700">Seleziona il file:</p>
-                            <div class="bg-gray-100 rounded-lg p-2 mt-1">
-                                <code class="text-sm text-primary font-medium">HOW TO ACCESS TO THE DEMO.pdf</code>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-start space-x-3">
-                        <div class="w-6 h-6 bg-success/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <svg class="w-3 h-3 text-success" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <p class="text-gray-700">Invia l'email completata</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end space-x-3">
-                <button onclick="hideInstructions()" class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium rounded-lg hover:bg-gray-200 transition-all duration-200">
-                    Annulla
-                </button>
-                <button onclick="sendMail()" class="px-6 py-2 bg-primary hover:bg-primary-dark text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
-                    Apri Outlook
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Get references to elements
-        const dashboardContainer = document.getElementById('dashboard-container');
-        const demoToolContainer = document.getElementById('demo-tool-container');
-        const credentialsToolContainer = document.getElementById('credentials-tool-container');
-        const showDemoBtn = document.getElementById('show-demo-btn');
-        const showCredentialsBtn = document.getElementById('show-credentials-btn');
-        const backToDashboardDemoBtn = document.getElementById('back-to-dashboard-demo');
-        const backToDashboardCredentialsBtn = document.getElementById('back-to-dashboard-credentials');
-
-        // --- Richiesta Demo Tool Logic ---
-        const createAndOpenBtn = document.getElementById('createAndOpenBtn');
-        const copySubjectBtn = document.getElementById('copySubjectBtn');
-        const clientNameInput = document.getElementById('clientName');
-        const countryInput = document.getElementById('country');
-        const expirationPeriodSelect = document.getElementById('expirationPeriod');
-        const courseOption = document.getElementById('courseOption');
-        const messageDiv = document.getElementById('message');
-        const supportLink = 'https://support.ima.it/TouchPortal/#/Page/HOME@item-769-S1129X-1195';
-        const subjectDemo = "Richiesta creazione utenza DEMO";
-
-        showDemoBtn.addEventListener('click', () => {
-            dashboardContainer.classList.add('hidden');
-            demoToolContainer.classList.remove('hidden');
-        });
-
-        backToDashboardDemoBtn.addEventListener('click', () => {
-            demoToolContainer.classList.add('hidden');
-            dashboardContainer.classList.remove('hidden');
-        });
-
-        createAndOpenBtn.addEventListener('click', () => {
-            const clientName = clientNameInput.value.trim();
-            const country = countryInput.value.trim();
-            const expirationValue = expirationPeriodSelect.value;
-            const selectedOption = courseOption.value;
-
-            if (clientName === '' || country === '') {
-                displayMessage('Per favore, compila i campi "Nome Cliente" e "Nazione".', 'red', messageDiv);
-                return;
-            }
-
-            let firstLink = '';
-            let secondLink = '';
-
-            if (selectedOption === 'XTREMA') {
-                firstLink = 'https://skillgateforbusiness.ima.it/goto.php?target=cat_14219&client_id=ilias';
-                secondLink = 'https://skillgateforbusiness.ima.it/goto.php?target=cat_15073&client_id=ilias ; https://skillgateforbusiness.ima.it/goto.php?target=crs_15203&client_id=ilias';
-            } else if (selectedOption === 'INJECTA') {
-                firstLink = 'https://skillgateforbusiness.ima.it/goto.php?target=cat_14217&client_id=ilias';
-                secondLink = 'https://skillgateforbusiness.ima.it/goto.php?target=cat_15490&client_id=ilias ; https://skillgateforbusiness.ima.it/goto.php?target=crs_15492&client_id=ilias';
-            }
-
-            const expirationPeriodText = (expirationValue === '1') ? `${expirationValue} MESE` : `${expirationValue} MESI`;
-            const emailBody = `Buon pomeriggio,
-con la presente, faccio gentile richiesta per:
-Creare utenza generica DEMO per il cliente ${clientName} (${country}) (COME DA ACCORDI/CONVENZIONE condivisa, prego di includere il riferimento al sito produttivo del cliente nell'Username)
-• Iscriverlo con lingua principale EN a:
-o TUTTI i Coirsi presenti al seguente percorso : ${firstLink}
-o Più a questi appartenenti ai contesti di rimando: ${secondLink}
-• SCADENZA: ${expirationPeriodText}
-Grazie mille,
-Raoul Filippi`;
-
-            const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = emailBody;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempTextArea);
-
-            window.open(supportLink, '_blank');
-            displayMessage('Email copiata e link aperto!', 'green', messageDiv);
-        });
-
-        copySubjectBtn.addEventListener('click', () => {
-            const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = subjectDemo;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempTextArea);
-            displayMessage('Oggetto copiato negli appunti!', 'blue', messageDiv);
-        });
-
-        // --- Invia Credenziali Tool Logic ---
-        document.addEventListener('DOMContentLoaded', function() {
-            const expirationDateInput = document.getElementById("expirationDate");
-            const today = new Date();
-            const twoMonthsLater = new Date(today.getFullYear(), today.getMonth() + 2, today.getDate());
-            
-            const year = twoMonthsLater.getFullYear();
-            const month = (twoMonthsLater.getMonth() + 1).toString().padStart(2, '0');
-            const day = twoMonthsLater.getDate().toString().padStart(2, '0');
-            
-            expirationDateInput.value = `${year}-${month}-${day}`;
-
-            document.getElementById('emailForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                if (validateForm()) {
-                    showInstructions();
-                }
-            });
-        });
-        
-        showCredentialsBtn.addEventListener('click', () => {
-            dashboardContainer.classList.add('hidden');
-            credentialsToolContainer.classList.remove('hidden');
-        });
-
-        backToDashboardCredentialsBtn.addEventListener('click', () => {
-            credentialsToolContainer.classList.add('hidden');
-            dashboardContainer.classList.remove('hidden');
-        });
-
-        function validateForm() {
-            const emailField = document.getElementById('to');
-            const usernameField = document.getElementById('username');
-            const passwordField = document.getElementById('password');
-            const emailErrorDiv = document.getElementById('email-error');
-            
-            let isValid = true;
-            emailErrorDiv.textContent = '';
-            emailErrorDiv.classList.add('hidden');
-            
-            const fields = [emailField, usernameField, passwordField];
-            fields.forEach(field => {
-                field.classList.remove('border-red-300', 'focus:ring-red-500');
-            });
-            
-            if (emailField.value.trim() === '') {
-                emailField.classList.add('border-red-300', 'focus:ring-red-500');
-                isValid = false;
-            } else {
-                const emails = emailField.value.split(/[\s,]+/).filter(email => email.trim());
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                const invalidEmails = emails.filter(email => !emailRegex.test(email.trim()));
-                if (invalidEmails.length > 0) {
-                    emailField.classList.add('border-red-300', 'focus:ring-red-500');
-                    emailErrorDiv.textContent = `Email non valide: ${invalidEmails.join(', ')}`;
-                    emailErrorDiv.classList.remove('hidden');
-                    isValid = false;
-                }
-            }
-
-            if (usernameField.value.trim() === '') {
-                usernameField.classList.add('border-red-300', 'focus:ring-red-500');
-                isValid = false;
-            }
-            
-            if (passwordField.value.trim() === '') {
-                passwordField.classList.add('border-red-300', 'focus:ring-red-500');
-                isValid = false;
-            }
-            
-            return isValid;
-        }
-
-        function showPreview() {
-            if (!validateForm()) return;
-
-            const language = document.getElementById("language").value;
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            const expirationDate = document.getElementById("expirationDate").value;
-            
-            const body = generateEmailBody(language, username, password, expirationDate);
-            
-            document.getElementById("email-preview").innerHTML = `
-                <div class="space-y-4">
-                    <div class="pb-2 border-b border-gray-200">
-                        <div class="mb-2"><strong class="text-gray-800">Oggetto:</strong> <span class="text-primary">Access to IMA SkillGate – Digital Training Demo</span></div>
-                        <div><strong class="text-gray-800">Destinatari:</strong> <span class="text-primary">${document.getElementById("to").value}</span></div>
-                    </div>
-                    <div>
-                        <strong class="text-gray-800 block mb-2">Contenuto completo:</strong>
-                        <div class="bg-gray-50 rounded-lg p-4 border">
-                            <pre class="whitespace-pre-wrap text-sm text-gray-700 font-mono leading-relaxed">${body}</pre>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById("preview-section").classList.remove("hidden");
-            document.getElementById("preview-section").scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function showInstructions() {
-            document.getElementById("instructions-modal").classList.remove("hidden");
-        }
-
-        function hideInstructions() {
-            document.getElementById("instructions-modal").classList.add("hidden");
-        }
-
-        function generateEmailBody(language, username, password, expirationDate) {
-            const expirationText = expirationDate ? `\nEXPIRATION DAY: ${expirationDate}` : '';
-            const translations = {
-                eng: `Good morning,
-Please find attached the information and guidance for accessing the training options that IMA can provide.
-As anticipated, we have created generic and temporary credentials for you on IMA SkillGate, allowing you to independently access and explore a selection of examples from IMA Life's digital training portfolio.
-To proceed, simply log in to the e-learning platform and select the course of interest. You may also use the "COLLECTOR" feature for a more visual overview of the available content.
-Your credentials for digital training demo
-USERNAME: ${username}
-PASSWORD: ${password}${expirationText}
-Following this communication, you will also receive a meeting invitation scheduled for one month from now, during which we will kindly ask for your feedback on the matter. If you consider it appropriate, please feel free to extend the invitation to any colleagues who may be concerned.
-----------------------
-Best regards,
-Raoul Filippi
-Training Manager`,
-                ita: `Buongiorno,
-Allego le informazioni e le linee guida per l'accesso alle opzioni di formazione che IMA può fornire.
-Come anticipato, abbiamo creato delle credenziali generiche e temporanee per lei su IMA SkillGate, permettendole di accedere ed esplorare autonomamente una selezione di esempi dal portfolio di formazione digitale di IMA Life.
-Per procedere, basta accedere alla piattaforma di e-learning e selezionare il corso di interesse. Può anche usare la funzionalità "COLLECTOR" per una panoramica più visuale dei contenuti disponibili.
-Le sue credenziali per la demo di formazione digitale
-USERNAME: ${username}
-PASSWORD: ${password}${expirationText}
-A seguito di questa comunicazione, riceverà anche un invito a una riunione fissata tra un mese, durante la quale le chiederemo gentilmente un feedback in merito. Se lo ritiene opportuno, si senta libero di estendere l'invito a qualsiasi collega che possa essere interessato.
-----------------------
-Cordiali saluti,
-Raoul Filippi
-Training Manager`,
-                spa: `Buenos días,
-Adjunto la información y las pautas para acceder a las opciones de capacitación que IMA puede proporcionar.
-Como se anticipó, hemos creado credenciales genéricas y temporales para usted en IMA SkillGate, lo que le permite acceder y explorar de forma independiente una selección de ejemplos de la cartera de formación digital de IMA Life.
-Para continuar, simplemente inicie sesión en la plataforma de e-learning y seleccione el curso de su interés. También puede utilizar la función "COLLECTOR" para una descripción más visual del contenido disponible.
-Sus credenciales para la demostración de formación digital
-NOMBRE DE USUARIO: ${username}
-CONTRASEÑA: ${password}${expirationText}
-Después de esta comunicación, también recibirá una invitación a una reunión programada para dentro de un mes, durante la cual le pediremos amablemente sus comentarios al respecto. Si lo considera apropiado, no dude en extender la invitación a cualquier colega que pueda estar interesado.
-----------------------
-Saludos cordiales,
-Raoul Filippi
-Training Manager`,
-                fra: `Bonjour,
-Veuillez trouver ci-joint les informations et les conseils pour accéder aux options de formation qu'IMA peut vous offrir.
-Comme prévu, nous avons créé des identifiants génériques et temporaires pour vous sur IMA SkillGate, vous permettant d'accéder et d'explorer de manière autonome une sélection d'exemples du portefeuille de formation numérique d'IMA Life.
-Pour continuer, connectez-vous simplement à la plateforme d'e-learning et sélectionnez le cours qui vous intéresse. Vous pouvez également utiliser la fonction "COLLECTOR" pour un aperçu plus visuel du contenu disponible.
-Vos identifiants pour la démo de formation numérique
-NOM D'UTILISATEUR: ${username}
-MOT DE PASSE: ${password}${expirationText}
-À la suite de cette communication, vous recevrez également une invitation à une réunion prévue dans un mois, au cours de laquelle nous vous demanderons votre avis sur la question. Si vous le jugez approprié, n'hésitez pas à étendre l'invitation à tout collègue susceptible d'être concerné.
-----------------------
-Cordialement,
-Raoul Filippi
-Training Manager`,
-                deu: `Guten Morgen,
-Anbei finden Sie die Informationen und Anleitungen für den Zugriff auf die Schulungsoptionen, die IMA anbieten kann.
-Wie angekündigt, haben wir für Sie generische und temporäre Anmeldedaten auf IMA SkillGate erstellt, die es Ihnen ermöglichen, eine Auswahl von Beispielen aus dem digitalen Schulungsportfolio von IMA Life selbstständig zu erkunden.
-Um fortzufahren, melden Sie sich einfach auf der E-Learning-Plattform an und wählen Sie den gewünschten Kurs aus. Sie können auch die "COLLECTOR"-Funktion für einen visuelleren Überblick über die verfügbaren Inhalte nutzen.
-Ihre Zugangsdaten für die digitale Schulungsdemo
-BENUTZERNAME: ${username}
-PASSWORT: ${password}${expirationText}
-Im Anschluss an diese Kommunikation erhalten Sie auch eine Einladung zu einem Termin, der in einem Monat stattfindet. Bei diesem Termin werden wir Sie freundlich um Ihr Feedback bitten. Wenn Sie es für angemessen halten, können Sie die Einladung gerne an alle Kollegen weiterleiten, die betroffen sein könnten.
-----------------------
-Mit freundlichen Grüßen,
-Raoul Filippi
-Training Manager`
-            };
-            return translations[language];
-        }
-
-        function sendMail() {
-            const subject = "Access to IMA SkillGate – Digital Training Demo";
-            const to = document.getElementById("to").value.replace(/[\s,]+/g, ';');
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            const language = document.getElementById("language").value;
-            const expirationDate = document.getElementById("expirationDate").value;
-            
-            const body = generateEmailBody(language, username, password, expirationDate);
-            
-            const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            window.location.href = mailtoLink;
-            
-            hideInstructions();
-        }
-
-        function displayMessage(text, color, targetDiv) {
-            targetDiv.textContent = text;
-            if (color === 'green') {
-                targetDiv.className = 'mt-6 text-center text-sm font-medium text-green-700 opacity-100 transition-opacity duration-300';
-            } else if (color === 'red') {
-                targetDiv.className = 'mt-6 text-center text-sm font-medium text-red-700 opacity-100 transition-opacity duration-300';
-            } else if (color === 'blue') {
-                targetDiv.className = 'mt-6 text-center text-sm font-medium text-blue-700 opacity-100 transition-opacity duration-300';
-            }
-            
-            setTimeout(() => {
-                targetDiv.style.opacity = '0';
-            }, 3000);
-        }
-    </script>
 </body>
 </html>
