@@ -653,7 +653,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     mobileOverlay.addEventListener('click', ()=> closeMobileMenu());
   }
 
-  mobileMenu.querySelectorAll('a, select').forEach(el => {
+  mobileMenu.querySelectorAll('a').forEach(el => {
     el.addEventListener('click', ()=> setTimeout(()=> closeMobileMenu(), 60));
   });
 
