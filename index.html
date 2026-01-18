@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Galleria - Casa Vacanze Gianna</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Aggiunto FontAwesome come in prezzario.html -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -22,7 +23,6 @@
       font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
       color: var(--text-dark);
-      margin: 0;
     }
 
     /* Stile per disabilitare lo scroll del body quando il modale è aperto */
@@ -34,354 +34,899 @@
       font-family: 'Playfair Display', serif;
     }
 
+    .hero-gradient {
+      background-image: url('spiaggia4.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
     .glass-effect {
       backdrop-filter: blur(8px);
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    .nav-link {
-      position: relative;
-      transition: color 0.3s ease;
+    .card-hover {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 2px;
-      bottom: -4px;
-      left: 0;
-      background-color: var(--accent-gold);
-      transition: width 0.3s ease;
+    .card-hover:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 
-    .nav-link:hover::after {
-      width: 100%;
-    }
-
-    /* Stili per la galleria */
     .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1rem;
       cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .gallery-item:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.3);
     }
 
-    .image-zoom {
-      transition: transform 0.5s ease;
+    .gallery-item img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      transition: transform 0.4s ease;
     }
 
-    .gallery-item:hover .image-zoom {
+    .gallery-item:hover img {
+      transform: scale(1.1);
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, rgba(30, 58, 138, 0.7), rgba(6, 182, 212, 0.7));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gallery-item:hover .gallery-overlay {
+      opacity: 1;
+    }
+
+    .lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(10px);
+    }
+
+    .lightbox.show {
+      display: flex;
+    }
+
+    .lightbox-content {
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+      background-color: transparent;
+    }
+
+    .lightbox-content img {
+      max-width: 70vw;
+      max-height: 70vh;
+      object-fit: contain;
+      display: block;
+      border-radius: 0.5rem;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+      transition: transform 0.1s ease-out;
+      transform-origin: center center;
+      cursor: grab;
+    }
+
+    .lightbox-content img.dragging {
+      cursor: grabbing;
+    }
+
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: none;
+      color: white;
+      font-size: 2rem;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      z-index: 10001;
+    }
+
+    .lightbox-nav:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .lightbox-prev {
+      left: 2rem;
+    }
+
+    .lightbox-next {
+      right: 2rem;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: none;
+      color: white;
+      font-size: 2rem;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      z-index: 10001;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .floating-element {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .stagger-animation {
+      animation: staggerIn 0.6s ease-out forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    @keyframes staggerIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .contact-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      backdrop-filter: blur(10px);
+    }
+
+    .contact-modal.show {
+      display: flex;
+    }
+
+    .contact-modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      max-width: 90%;
+      width: 400px;
+      position: relative;
+      text-align: center;
+    }
+
+    .contact-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      color: #333;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .contact-modal-close:hover {
+      color: #ef4444;
+    }
+
+    .profile-pic {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .profile-pic:hover {
       transform: scale(1.05);
     }
 
-    /* Animazione modale */
-    .modal-enter {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    .modal-enter-active {
-      opacity: 1;
-      transform: scale(1);
-      transition: opacity 0.3s ease, transform 0.3s ease;
+    /* --- REGOLE RESPONSIVE AGGIUNTE DA PREZZARIO.HTML --- */
+    /* Mobile menu + overlay - FIXED z-index */
+    #mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 55; }
+    #mobile-overlay.show { display: block; }
+    #mobile-menu { display: none; position: fixed; top: 80px; left: 0; width: 100%; background: #fff; border-top: 1px solid #e5e7eb; box-shadow: 0 6px 20px rgba(0,0,0,0.12); z-index: 56; max-height: calc(100vh - 80px); overflow:auto; }
+    #mobile-menu.show { display: block; }
+    #menu-btn { position: relative; z-index: 60; }
+
+    @media (max-width: 768px) {
+      .lightbox-nav, .lightbox-close {
+        font-size: 1.5rem;
+        width: 45px;
+        height: 45px;
+        padding: 0;
+      }
+      .lightbox-prev { left: 1rem; }
+      .lightbox-next { right: 1rem; }
+      .lightbox-close { top: 1rem; right: 1rem; }
     }
   </style>
 </head>
 <body class="min-h-screen">
 
-  <!-- HEADER (Uniformato a prezzario.html) -->
-  <header class="fixed w-full top-0 z-50 glass-effect border-b border-gray-200 shadow-sm">
+  <!-- HEADER UGUALE A PREZZARIO -->
+  <header class="fixed top-0 w-full z-50 glass-effect">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-20">
-        <!-- Logo -->
-        <div class="flex-shrink-0 flex items-center gap-3">
-          <div class="w-10 h-10 bg-blue-800 rounded-lg flex items-center justify-center shadow-lg transform -rotate-3 hover:rotate-0 transition-transform duration-300">
-            <i class="fas fa-home text-white text-xl"></i>
-          </div>
+        <!-- Logo e info -->
+        <div class="flex items-center space-x-3">
+          <img id="gianna-profile-pic" src="gianna1.jpg" alt="Gianna" class="profile-pic">
           <div>
-            <h1 class="text-xl font-bold text-blue-900 leading-tight heading-font tracking-tight">Casa Vacanze Gianna</h1>
-            <p class="text-[10px] uppercase tracking-[0.2em] text-amber-600 font-semibold">Salento Experience</p>
+            <h1 class="heading-font text-xl font-semibold text-gray-900">Casa Gianna</h1>
+            <p class="text-sm text-gray-600" data-key="nav-location">Lido delle Nazioni</p>
           </div>
         </div>
 
-        <!-- Desktop Navigation -->
-        <nav class="hidden md:flex items-center space-x-8">
-          <a href="index.html" id="nav-home" class="nav-link text-sm font-medium text-gray-700 hover:text-blue-800">Home</a>
-          <a href="gallery.html" id="nav-gallery" class="nav-link text-sm font-medium text-blue-800 border-b-2 border-amber-500">Gallery</a>
-          <a href="prezzario.html" id="nav-prices" class="nav-link text-sm font-medium text-gray-700 hover:text-blue-800">Prezzi</a>
+        <!-- Desktop links -->
+        <div class="hidden md:flex items-center space-x-4">
+          <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium" data-key="nav-home-desktop">Home</a>
+          <a href="#gallery-section" class="text-gray-700 hover:text-blue-600 font-medium" data-key="nav-gallery-desktop">Galleria</a>
+          <a href="#features-section" class="text-gray-700 hover:text-blue-600 font-medium" data-key="nav-features-desktop">Caratteristiche</a>
+          <a href="#contact-section" class="text-gray-700 hover:text-blue-600 font-medium" data-key="nav-contact-desktop">Contatti</a>
           
-          <div class="h-6 w-px bg-gray-300"></div>
-          
-          <!-- Language Selector -->
-          <div class="flex items-center gap-2">
-            <select id="language-select" class="bg-transparent text-sm font-medium text-gray-700 border-none focus:ring-0 cursor-pointer">
-              <option value="it">🇮🇹 IT</option>
-              <option value="en">🇬🇧 EN</option>
-            </select>
-          </div>
-        </nav>
+          <select id="language-select" class="px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700">
+            <option value="it">🇮🇹 Italiano</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="de">🇩🇪 Deutsch</option>
+          </select>
+        </div>
 
-        <!-- Mobile Menu Button -->
+        <!-- Hamburger mobile -->
         <div class="md:hidden flex items-center">
-          <button id="mobile-menu-button" class="text-gray-700 hover:text-blue-800 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-            <i class="fas fa-bars text-2xl"></i>
+          <button id="menu-btn" class="text-gray-700 hover:text-blue-600 focus:outline-none" aria-label="Apri menu">
+            <i class="fa-solid fa-bars fa-lg"></i>
           </button>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Mobile Menu Overlay (Uniformato a prezzario.html) -->
-  <div id="mobile-menu" class="fixed inset-0 z-[60] bg-white transform -translate-y-full transition-transform duration-300 ease-in-out hidden flex flex-col">
-    <div class="flex justify-between items-center p-6 border-b">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center shadow-lg">
-          <i class="fas fa-home text-white text-sm"></i>
+  <!-- OVERLAY E MENU MOBILE FUORI DALL'HEADER (Come prezzario) -->
+  <div id="mobile-overlay" aria-hidden="true"></div>
+
+  <nav id="mobile-menu" class="md:hidden" aria-hidden="true">
+    <div class="flex flex-col p-4 space-y-2">
+      <a href="index.html" class="text-gray-700 hover:text-blue-600 font-medium" data-key="nav-home-mobile">Home</a>
+      <a href="#gallery-section" class="text-gray-700 hover:text-blue-600 font-medium" data-key="nav-gallery-mobile">Galleria</a>
+      <a href="#features-section" class="text-gray-700 hover:text-blue-600 font-medium" data-key="nav-features-mobile">Caratteristiche</a>
+      <a href="#contact-section" class="text-gray-700 hover:text-blue-600 font-medium" data-key="nav-contact-mobile">Contatti</a>
+      <select id="mobile-language-select" class="px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 mt-2">
+        <option value="it">🇮🇹 Italiano</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="de">🇩🇪 Deutsch</option>
+      </select>
+    </div>
+  </nav>
+
+  <section class="hero-gradient pt-32 pb-20 relative overflow-hidden">
+    <div class="absolute inset-0 bg-black/20"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="floating-element">
+        <h1 class="heading-font text-4xl md:text-6xl font-bold text-white mb-6">
+          <span data-key="hero-title">Galleria Casa Gianna</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto" data-key="hero-subtitle">
+          Scopri ogni angolo della tua prossima casa vacanze
+        </p>
+        <div class="flex justify-center space-x-4 text-white/80">
+          <span class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+            </svg>
+            <span data-key="hero-photos">Dettagli Cristallini</span>
+          </span>
+          <span class="flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>
+            </svg>
+            <span data-key="hero-rooms">Un Tour Completo</span>
+          </span>
         </div>
-        <span class="font-bold text-blue-900 heading-font">Casa Gianna</span>
       </div>
-      <button id="close-mobile-menu" class="text-gray-500 hover:text-blue-800 p-2">
-        <i class="fas fa-times text-2xl"></i>
-      </button>
     </div>
-    
-    <div class="flex flex-col p-6 space-y-6 flex-grow">
-      <a href="index.html" class="text-2xl font-semibold text-gray-800 hover:text-blue-800 transition-colors">Home</a>
-      <a href="gallery.html" class="text-2xl font-semibold text-blue-800 transition-colors">Gallery</a>
-      <a href="prezzario.html" class="text-2xl font-semibold text-gray-800 hover:text-blue-800 transition-colors">Prezzi</a>
-      
-      <div class="pt-6 border-t">
-        <p class="text-sm text-gray-500 mb-4 uppercase tracking-widest font-semibold">Lingua / Language</p>
-        <div class="grid grid-cols-2 gap-4">
-          <button onclick="changeLang('it')" class="flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-blue-50 transition-colors">
-            <span class="text-xl">🇮🇹</span> <span class="font-medium">Italiano</span>
-          </button>
-          <button onclick="changeLang('en')" class="flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-200 hover:bg-blue-50 transition-colors">
-            <span class="text-xl">🇬🇧</span> <span class="font-medium">English</span>
-          </button>
+  </section>
+
+  <section class="py-20 bg-white" id="gallery-section">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="heading-font text-4xl font-bold text-gray-900 mb-4" data-key="gallery-title">
+          Esplora Casa Gianna
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto" data-key="gallery-subtitle">
+          Ogni foto racconta la storia del tuo perfetto soggiorno al mare
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="gallery">
+        <!-- Gallery items will be injected here by JavaScript -->
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 bg-gradient-to-br from-slate-50 to-blue-50" id="features-section">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="heading-font text-4xl font-bold text-gray-900 mb-4" data-key="features-title">
+          Caratteristiche Uniche
+        </h2>
+        <p class="text-xl text-gray-600" data-key="features-subtitle">
+          Dettagli che fanno la differenza
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="card-hover bg-white p-8 rounded-2xl shadow-sm">
+          <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6">
+            <span class="text-white text-2xl">🏖️</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3" data-key="feature-beach-title">Vicino al Mare</h3>
+          <p class="text-gray-600" data-key="feature-beach-desc">200 metri dalla spiaggia di Lido delle Nazioni</p>
+        </div>
+
+        <div class="card-hover bg-white p-8 rounded-2xl shadow-sm">
+          <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-6">
+            <span class="text-white text-2xl">🌿</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3" data-key="feature-garden-title">Giardino Privato</h3>
+          <p class="text-gray-600" data-key="feature-garden-desc">Spazi verdi per relax e privacy</p>
+        </div>
+
+        <div class="card-hover bg-white p-8 rounded-2xl shadow-sm">
+          <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6">
+            <span class="text-white text-2xl">🛏️</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3" data-key="feature-rooms-title">Camere Confortevoli</h3>
+          <p class="text-gray-600" data-key="feature-rooms-desc">Arredamento curato e spazi luminosi</p>
+        </div>
+
+        <div class="card-hover bg-white p-8 rounded-2xl shadow-sm">
+          <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mb-6">
+            <span class="text-white text-2xl">🍽️</span>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3" data-key="feature-kitchen-title">Cucina Completa</h3>
+          <p class="text-gray-600" data-key="feature-kitchen-desc">Elettrodomestici moderni e funzionali</p>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <main class="pt-32 pb-20 px-4 max-w-7xl mx-auto">
-    <!-- Header Sezione -->
-    <div class="text-center mb-16">
-      <h2 id="gallery-title" class="text-4xl md:text-5xl font-bold text-blue-900 mb-4 heading-font">Galleria Fotografica</h2>
-      <div class="w-24 h-1 bg-amber-500 mx-auto rounded-full mb-6"></div>
-      <p id="gallery-subtitle" class="text-lg text-gray-600 max-w-2xl mx-auto italic font-light">
-        Scorri le immagini per scoprire il comfort e lo stile della nostra casa vacanze.
-      </p>
-    </div>
+  <section class="py-20 bg-gradient-to-br from-blue-600 to-cyan-600" id="contact-section">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center text-white mb-16">
+        <h2 class="heading-font text-4xl font-bold mb-4" data-key="contact-title">
+          Ti Piace Quello Che Vedi?
+        </h2>
+        <p class="text-xl text-blue-100 max-w-2xl mx-auto" data-key="contact-subtitle">
+          Prenota ora la tua vacanza da sogno
+        </p>
+      </div>
 
-    <!-- Griglia Gallleria -->
-    <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      <!-- Gli elementi verranno inseriti via JS -->
-    </div>
-  </main>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <a href="https://wa.me/393388984269?text=Ciao%2C%20vorrei%20ricevere%20maggiori%20informazioni%20su%20Casa%20Vacanze%20Gianna"
+           target="_blank"
+           class="card-hover bg-white/10 backdrop-blur-sm border border-white/20 p-8 rounded-2xl text-center text-white hover:bg-white/20 transition duration-300">
+          <div class="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl">💬</span>
+          </div>
+          <h3 class="text-xl font-semibold mb-3" data-key="contact-whatsapp">WhatsApp</h3>
+          <p class="text-blue-100 mb-4" data-key="contact-whatsapp-desc">Risposta immediata</p>
+          <span class="text-white font-medium" data-key="contact-whatsapp-action">Chatta con noi</span>
+        </a>
 
-  <!-- Modale Immagine (Lightbox) -->
-  <div id="image-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black bg-opacity-95 p-4 transition-opacity duration-300">
-    <button id="close-modal" class="absolute top-6 right-6 text-white text-4xl hover:text-amber-500 transition-colors z-50">
-      <i class="fas fa-times"></i>
-    </button>
-    
-    <div class="max-w-5xl w-full flex flex-col items-center">
-      <img id="modal-image" src="" alt="Galleria" class="max-h-[85vh] max-w-full rounded-lg shadow-2xl object-contain">
-      <div class="mt-6 text-center">
-        <p id="modal-caption" class="text-white text-xl font-medium heading-font"></p>
+        <a href="mailto:casamarenazioni@gmail.com?subject=Richiesta%20di%20prenotazione%20per%20Casa%20Vacanze%20Gianna"
+           class="card-hover bg-white/10 backdrop-blur-sm border border-white/20 p-8 rounded-2xl text-center text-white hover:bg-white/20 transition duration-300">
+          <div class="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl">📧</span>
+          </div>
+          <h3 class="text-xl font-semibold mb-3" data-key="contact-email">Email</h3>
+          <p class="text-blue-100 mb-4" data-key="contact-email-desc">Richiesta dettagliata</p>
+          <span class="text-white font-medium" data-key="contact-email-action">Scrivi una mail</span>
+        </a>
+
+        <a href="https://www.google.com/maps?q=44.733726811572964,12.23992232510686"
+           target="_blank"
+           class="card-hover bg-white/10 backdrop-blur-sm border border-white/20 p-8 rounded-2xl text-center text-white hover:bg-white/20 transition duration-300">
+          <div class="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <span class="text-2xl">📍</span>
+          </div>
+          <h3 class="text-xl font-semibold mb-3" data-key="contact-location">Posizione</h3>
+          <p class="text-blue-100 mb-4" data-key="contact-location-desc">Visualizza su Maps</p>
+          <span class="text-white font-medium" data-key="contact-location-action">Apri Maps</span>
+        </a>
       </div>
     </div>
-
-    <!-- Pulsanti Navigazione Modale -->
-    <button id="prev-btn" class="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-amber-500 p-2 transition-colors">
-      <i class="fas fa-chevron-left"></i>
-    </button>
-    <button id="next-btn" class="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-amber-500 p-2 transition-colors">
-      <i class="fas fa-chevron-right"></i>
-    </button>
-  </div>
+  </section>
 
   <footer class="bg-gray-900 text-white py-12">
-    <div class="max-w-7xl mx-auto px-4 text-center">
-      <h2 class="heading-font text-2xl font-bold mb-4">Casa Vacanze Gianna</h2>
-      <p class="text-gray-400 mb-8 max-w-md mx-auto">
-        Il tuo angolo di paradiso nel cuore del Salento. Un'esperienza autentica tra comfort e tradizione.
-      </p>
-      <div class="flex justify-center space-x-6 mb-8 text-xl">
-        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors"><i class="fab fa-facebook"></i></a>
-        <a href="#" class="text-gray-400 hover:text-pink-400 transition-colors"><i class="fab fa-instagram"></i></a>
-        <a href="#" class="text-gray-400 hover:text-green-400 transition-colors"><i class="fab fa-whatsapp"></i></a>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <h3 class="heading-font text-2xl font-bold mb-2">Casa Vacanze Gianna</h3>
+          <p class="text-gray-400" data-key="footer-location">Lido delle Nazioni, Comacchio (FE), Italia</p>
+        </div>
+        <div class="text-center md:text-right">
+          <p class="text-gray-400">© <span id="current-year"></span> Casa Vacanze Gianna</p>
+          <p class="text-gray-400 mt-2" data-key="footer-rights">Tutti i diritti riservati</p>
+        </div>
       </div>
-      <p class="text-gray-500 text-sm">
-        &copy; <span id="current-year"></span> Casa Vacanze Gianna. All rights reserved.
-      </p>
     </div>
   </footer>
 
+  <!-- Lightbox per le immagini della galleria -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="closeBtn">×</button>
+    <button class="lightbox-nav lightbox-prev" id="prevBtn">❮</button>
+    <div class="lightbox-content">
+      <img id="lightbox-img" src="" alt="">
+    </div>
+    <button class="lightbox-nav lightbox-next" id="nextBtn">❯</button>
+  </div>
+
+  <!-- Modale per i contatti di Gianna -->
+  <div class="contact-modal" id="contactModal">
+    <div class="contact-modal-content">
+      <button class="contact-modal-close" id="closeContactModalBtn">×</button>
+      <h3 class="heading-font text-2xl font-bold mb-4" data-key="contact-card-title">Contatti di Gianna</h3>
+      <div class="text-center mb-4">
+        <img id="contact-modal-img" src="gianna1.jpg" alt="Gianna" class="mx-auto rounded-full w-32 h-32 object-cover mb-4">
+        <p class="text-lg font-semibold" data-key="contact-person-name">Gianna Santececca</p>
+      </div>
+      <div class="text-left space-y-2">
+        <p><strong data-key="contact-person-phone">Telefono:</strong> <a id="contact-phone-link" href="#" class="text-blue-600 hover:underline"></a></p>
+        <p><strong data-key="contact-person-whatsapp">WhatsApp:</strong> <a id="contact-whatsapp-link" href="#" target="_blank" class="text-blue-600 hover:underline"></a></p>
+        <p><strong data-key="contact-person-email">Email:</strong> <a id="contact-email-link" href="#" class="text-blue-600 hover:underline"></a></p>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Configurazione Immagini
+    // Dati delle immagini della galleria
     const galleryImages = [
-      { src: "https://images.unsplash.com/photo-1513584684374-8bdb7489feef?auto=format&fit=crop&q=80&w=1200", title: "Esterno e Patio", category: "Esterni" },
-      { src: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=1200", title: "Zona Living", category: "Interni" },
-      { src: "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?auto=format&fit=crop&q=80&w=1200", title: "Camera da Letto Padronale", category: "Interni" },
-      { src: "https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&q=80&w=1200", title: "Cucina Moderna", category: "Interni" },
-      { src: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&q=80&w=1200", title: "Bagno e Spa", category: "Interni" },
-      { src: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&q=80&w=1200", title: "Angolo Relax", category: "Interni" }
+      { src: "casa29.jpg", key: "gallery-img-1" },
+      { src: "casa35.jpg", key: "gallery-img-2" },
+      { src: "casa27.jpg", key: "gallery-img-3" },
+      { src: "casa14.jpg", key: "gallery-img-4" },
+      { src: "casa26.jpg", key: "gallery-img-5" },
+      { src: "casa37.jpg", key: "gallery-img-6" },
+      { src: "casa17.jpg", key: "gallery-img-7" },
+      { src: "casa2.jpg", key: "gallery-img-8" },
+      { src: "casa32.jpg", key: "gallery-img-9" },
+      { src: "casa11.jpg", key: "gallery-img-10" },
+      { src: "casa31.jpg", key: "gallery-img-11" },
+      { src: "casa36.png", key: "gallery-img-12" }
     ];
 
-    // Traduzioni
-    const translations = {
-      it: {
-        "nav-home": "Home",
-        "nav-gallery": "Gallery",
-        "nav-prices": "Prezzi",
-        "gallery-title": "Galleria Fotografica",
-        "gallery-subtitle": "Scorri le immagini per scoprire il comfort e lo stile della nostra casa vacanze.",
-        "img-titles": ["Esterno e Patio", "Zona Living", "Camera da Letto Padronale", "Cucina Moderna", "Bagno e Spa", "Angolo Relax"]
-      },
-      en: {
-        "nav-home": "Home",
-        "nav-gallery": "Gallery",
-        "nav-prices": "Prices",
-        "gallery-title": "Photo Gallery",
-        "gallery-subtitle": "Browse our images to discover the comfort and style of our holiday home.",
-        "img-titles": ["Exterior and Patio", "Living Area", "Master Bedroom", "Modern Kitchen", "Bathroom and Spa", "Relax Corner"]
-      }
+    const contactDetails = {
+        name: "Gianna Santececca",
+        phone: "+393388984269",
+        whatsapp: "+393388984269",
+        email: "casamarenazioni@gmail.com"
     };
 
-    let currentLang = 'it';
-    let currentImageIndex = 0;
+    let currentIndex = 0;
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const closeBtn = document.getElementById('closeBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const gallery = document.getElementById('gallery');
+    const lightboxContent = document.querySelector('.lightbox-content');
+    let currentZoom = 1;
+    const zoomStep = 0.1;
 
-    const galleryGrid = document.getElementById('gallery-grid');
-    const imageModal = document.getElementById('image-modal');
-    const modalImage = document.getElementById('modal-image');
-    const modalCaption = document.getElementById('modal-caption');
-    const languageSelect = document.getElementById('language-select');
-
-    // Funzione per impostare la lingua
-    function setLanguage(lang) {
-      currentLang = lang;
-      
-      document.getElementById('nav-home').textContent = translations[lang]["nav-home"];
-      document.getElementById('nav-gallery').textContent = translations[lang]["nav-gallery"];
-      document.getElementById('nav-prices').textContent = translations[lang]["nav-prices"];
-      document.getElementById('gallery-title').textContent = translations[lang]["gallery-title"];
-      document.getElementById('gallery-subtitle').textContent = translations[lang]["gallery-subtitle"];
-
-      // Aggiorna titoli immagini
-      createGalleryItems();
-    }
-
-    // Funzione globale chiamata dai pulsanti mobile (necessaria perché nell'overlay usiamo onclick)
-    window.changeLang = function(lang) {
-      languageSelect.value = lang;
-      setLanguage(lang);
-      // Chiudi il menu dopo la selezione
-      document.getElementById('close-mobile-menu').click();
-    };
-
-    // Creazione elementi galleria
     function createGalleryItems() {
-      galleryGrid.innerHTML = '';
-      galleryImages.forEach((img, index) => {
-        const title = translations[currentLang]["img-titles"][index] || img.title;
-        const item = document.createElement('div');
-        item.className = 'gallery-item group relative overflow-hidden rounded-2xl shadow-lg bg-white';
-        item.innerHTML = `
-          <div class="aspect-[4/3] overflow-hidden">
-            <img src="${img.src}" alt="${title}" class="image-zoom w-full h-full object-cover">
-          </div>
-          <div class="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-            <div>
-              <span class="text-amber-400 text-xs font-bold uppercase tracking-wider">${img.category}</span>
-              <h3 class="text-white text-lg font-semibold heading-font">${title}</h3>
+      gallery.innerHTML = '';
+      const currentLang = document.documentElement.lang;
+      
+      galleryImages.forEach((image, index) => {
+        const galleryItem = document.createElement('div');
+        galleryItem.className = 'gallery-item stagger-animation';
+        galleryItem.style.animationDelay = `${index * 0.1}s`;
+        const translatedAlt = translations[currentLang][image.key] || image.key;
+        
+        galleryItem.innerHTML = `
+          <img src="${image.src}" alt="${translatedAlt}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/000000?text=Immagine+non+trovata';">
+          <div class="gallery-overlay" data-index="${index}">
+            <div class="text-white text-center">
+              <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <span class="text-lg font-semibold">${translatedAlt}</span>
             </div>
           </div>
         `;
-        item.onclick = () => openModal(index);
-        galleryGrid.appendChild(item);
+        gallery.appendChild(galleryItem);
+      });
+
+      document.querySelectorAll('.gallery-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+          currentIndex = parseInt(e.currentTarget.dataset.index);
+          openLightbox(currentIndex);
+        });
       });
     }
 
-    // Gestione Modale
-    function openModal(index) {
-      currentImageIndex = index;
-      updateModalImage();
-      imageModal.classList.remove('hidden');
-      imageModal.classList.add('flex');
+    function openLightbox(index) {
+      const currentLang = document.documentElement.lang;
+      const translatedAlt = translations[currentLang][galleryImages[index].key] || galleryImages[index].key;
+
+      lightboxImg.src = galleryImages[index].src;
+      lightboxImg.alt = translatedAlt;
+      lightbox.classList.add('show');
       document.body.classList.add('no-scroll');
+      currentZoom = 1;
+      lightboxImg.style.transform = `scale(${currentZoom})`;
+      lightboxImg.addEventListener('wheel', handleImageZoom, { passive: false });
     }
 
-    function closeModal() {
-      imageModal.classList.add('hidden');
-      imageModal.classList.remove('flex');
+    function closeLightbox() {
+      lightbox.classList.remove('show');
+      lightboxImg.src = "";
+      lightboxImg.alt = "";
       document.body.classList.remove('no-scroll');
+      lightboxImg.removeEventListener('wheel', handleImageZoom);
     }
 
-    function updateModalImage() {
-      const img = galleryImages[currentImageIndex];
-      modalImage.src = img.src;
-      modalCaption.textContent = translations[currentLang]["img-titles"][currentImageIndex] || img.title;
+    function handleImageZoom(e) {
+      e.preventDefault();
+      const delta = Math.sign(e.deltaY);
+      if (delta === -1) currentZoom += zoomStep; else currentZoom -= zoomStep;
+      currentZoom = Math.max(0.5, Math.min(currentZoom, 3));
+      lightboxImg.style.transform = `scale(${currentZoom})`;
+      if (currentZoom > 1) lightboxContent.style.overflow = 'auto'; else lightboxContent.style.overflow = 'hidden';
     }
 
-    function nextImage() {
-      currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
-      updateModalImage();
+    function showNextImage() {
+      currentIndex = (currentIndex + 1) % galleryImages.length;
+      openLightbox(currentIndex);
     }
 
-    function prevImage() {
-      currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
-      updateModalImage();
+    function showPrevImage() {
+      currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+      openLightbox(currentIndex);
     }
 
-    // Listeners
-    languageSelect.addEventListener('change', (e) => setLanguage(e.target.value));
-    document.getElementById('close-modal').onclick = closeModal;
-    document.getElementById('next-btn').onclick = (e) => { e.stopPropagation(); nextImage(); };
-    document.getElementById('prev-btn').onclick = (e) => { e.stopPropagation(); prevImage(); };
-    
-    // Chiudi modale cliccando fuori dall'immagine
-    imageModal.onclick = (e) => {
-      if (e.target === imageModal) closeModal();
+    closeBtn.addEventListener('click', closeLightbox);
+    nextBtn.addEventListener('click', showNextImage);
+    prevBtn.addEventListener('click', showPrevImage);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('show')) closeLightbox();
+      if (e.key === 'ArrowRight' && lightbox.classList.contains('show')) showNextImage();
+      if (e.key === 'ArrowLeft' && lightbox.classList.contains('show')) showPrevImage();
+    });
+
+    const profilePic = document.getElementById('gianna-profile-pic');
+    const contactModal = document.getElementById('contactModal');
+    const closeContactModalBtn = document.getElementById('closeContactModalBtn');
+    const contactModalImg = document.getElementById('contact-modal-img');
+    const contactPhoneLink = document.getElementById('contact-phone-link');
+    const contactWhatsappLink = document.getElementById('contact-whatsapp-link');
+    const contactEmailLink = document.getElementById('contact-email-link');
+
+    function openContactModal() {
+        contactModalImg.src = "gianna1.jpg";
+        document.querySelector('#contactModal [data-key="contact-person-name"]').textContent = translations[document.documentElement.lang]["contact-person-name"];
+        contactPhoneLink.href = `tel:${contactDetails.phone}`;
+        contactPhoneLink.textContent = contactDetails.phone;
+        contactWhatsappLink.href = `https://wa.me/${contactDetails.whatsapp}`;
+        contactWhatsappLink.textContent = contactDetails.whatsapp;
+        contactEmailLink.href = `mailto:${contactDetails.email}`;
+        contactEmailLink.textContent = contactDetails.email;
+        contactModal.classList.add('show');
+    }
+
+    function closeContactModal() {
+        contactModal.classList.remove('show');
+    }
+
+    if (profilePic) profilePic.addEventListener('click', openContactModal);
+    if (closeContactModalBtn) closeContactModalBtn.addEventListener('click', closeContactModal);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && contactModal.classList.contains('show')) closeContactModal();
+    });
+
+    const languageSelect = document.getElementById('language-select');
+    const mobileLanguageSelect = document.getElementById('mobile-language-select');
+
+    const translations = {
+      it: {
+        "nav-location": "Lido delle Nazioni",
+        "nav-home-desktop": "Home",
+        "nav-gallery-desktop": "Galleria",
+        "nav-features-desktop": "Caratteristiche",
+        "nav-contact-desktop": "Contatti",
+        "nav-home-mobile": "Home",
+        "nav-gallery-mobile": "Galleria",
+        "nav-features-mobile": "Caratteristiche",
+        "nav-contact-mobile": "Contatti",
+        "hero-title": "Galleria Casa Gianna",
+        "hero-subtitle": "Scopri ogni angolo della tua prossima casa vacanze",
+        "hero-photos": "Dettagli Cristallini",
+        "hero-rooms": "Un Tour Completo",
+        "gallery-title": "Esplora Casa Gianna",
+        "gallery-subtitle": "Ogni foto racconta la storia del tuo perfetto soggiorno al mare",
+        "features-title": "Caratteristiche Uniche",
+        "features-subtitle": "Dettagli che fanno la differenza",
+        "feature-beach-title": "Vicino al Mare",
+        "feature-beach-desc": "200 metri dalla spiaggia di Lido delle Nazioni",
+        "feature-garden-title": "Giardino Privato",
+        "feature-garden-desc": "Spazi verdi per relax e privacy",
+        "feature-rooms-title": "Camere Confortevoli",
+        "feature-rooms-desc": "Arredamento curato e spazi luminosi",
+        "feature-kitchen-title": "Cucina Completa",
+        "feature-kitchen-desc": "Elettrodomestici moderni e funzionali",
+        "contact-title": "Ti Piace Quello Che Vedi?",
+        "contact-subtitle": "Prenota ora la tua vacanza da sogno",
+        "contact-whatsapp": "WhatsApp",
+        "contact-whatsapp-desc": "Risposta immediata",
+        "contact-whatsapp-action": "Chatta con noi",
+        "contact-email": "Email",
+        "contact-email-desc": "Richiesta dettagliata",
+        "contact-email-action": "Scrivi una mail",
+        "contact-location": "Posizione",
+        "contact-location-desc": "Visualizza su Maps",
+        "contact-location-action": "Apri Maps",
+        "footer-location": "Lido delle Nazioni, Comacchio (FE), Italia",
+        "footer-rights": "Tutti i diritti riservati",
+        "contact-card-title": "Contatti di Gianna",
+        "contact-person-name": "Gianna Santececca",
+        "contact-person-phone": "Telefono:",
+        "contact-person-whatsapp": "WhatsApp:",
+        "contact-person-email": "E-mail:",
+        "gallery-img-1": "Esterno Casa Gianna",
+        "gallery-img-2": "Ingresso principale",
+        "gallery-img-3": "Camera da letto con libreria",
+        "gallery-img-4": "Soggiorno luminoso",
+        "gallery-img-5": "Zona relax",
+        "gallery-img-6": "Parcheggio privato",
+        "gallery-img-7": "Zona pranzo e cucina",
+        "gallery-img-8": "Seconda camera da letto",
+        "gallery-img-9": "Giardino posteriore",
+        "gallery-img-10": "Doccia all'aperto",
+        "gallery-img-11": "Patio posteriore",
+        "gallery-img-12": "Distanza dal mare"
+      },
+      en: {
+        "nav-location": "Lido delle Nazioni",
+        "nav-home-desktop": "Home",
+        "nav-gallery-desktop": "Gallery",
+        "nav-features-desktop": "Features",
+        "nav-contact-desktop": "Contact",
+        "nav-home-mobile": "Home",
+        "nav-gallery-mobile": "Gallery",
+        "nav-features-mobile": "Features",
+        "nav-contact-mobile": "Contact",
+        "hero-title": "Casa Gianna Gallery",
+        "hero-subtitle": "Discover every corner of your next holiday home",
+        "hero-photos": "Crystal-Clear Details",
+        "hero-rooms": "A Complete Tour",
+        "gallery-title": "Explore Casa Gianna",
+        "gallery-subtitle": "Every photo tells the story of your perfect seaside stay",
+        "features-title": "Unique Features",
+        "features-subtitle": "Details that make the difference",
+        "feature-beach-title": "Near the Sea",
+        "feature-beach-desc": "200 meters from Lido delle Nazioni beach",
+        "feature-garden-title": "Private Garden",
+        "feature-garden-desc": "Green spaces for relaxation and privacy",
+        "feature-rooms-title": "Comfortable Rooms",
+        "feature-rooms-desc": "Carefully furnished and bright spaces",
+        "feature-kitchen-title": "Complete Kitchen",
+        "feature-kitchen-desc": "Modern and functional appliances",
+        "contact-title": "Like What You See?",
+        "contact-subtitle": "Book your dream vacation now",
+        "contact-whatsapp": "WhatsApp",
+        "contact-whatsapp-desc": "Immediate response",
+        "contact-whatsapp-action": "Chat with us",
+        "contact-email": "Email",
+        "contact-email-desc": "Detailed request",
+        "contact-email-action": "Write an email",
+        "contact-location": "Location",
+        "contact-location-desc": "View on Maps",
+        "contact-location-action": "Open Maps",
+        "footer-location": "Lido delle Nazioni, Comacchio (FE), Italy",
+        "footer-rights": "All rights reserved",
+        "contact-card-title": "Gianna's Contacts",
+        "contact-person-name": "Gianna Santececca",
+        "contact-person-phone": "Phone:",
+        "contact-person-whatsapp": "WhatsApp:",
+        "contact-person-email": "Email:",
+        "gallery-img-1": "Casa Gianna Exterior",
+        "gallery-img-2": "Main Entrance",
+        "gallery-img-3": "Bedroom with Bookshelf",
+        "gallery-img-4": "Bright Living Room",
+        "gallery-img-5": "Relaxation Area",
+        "gallery-img-6": "Private Parking",
+        "gallery-img-7": "Dining and Kitchen Area",
+        "gallery-img-8": "Second Bedroom",
+        "gallery-img-9": "Backyard Garden",
+        "gallery-img-10": "Outdoor Shower",
+        "gallery-img-11": "Back Patio",
+        "gallery-img-12": "Distance from the Sea"
+      },
+      de: {
+        "nav-location": "Lido delle Nazioni",
+        "nav-home-desktop": "Startseite",
+        "nav-gallery-desktop": "Galerie",
+        "nav-features-desktop": "Merkmale",
+        "nav-contact-desktop": "Kontakt",
+        "nav-home-mobile": "Startseite",
+        "nav-gallery-mobile": "Galerie",
+        "nav-features-mobile": "Merkmale",
+        "nav-contact-mobile": "Kontakt",
+        "hero-title": "Casa Gianna Galerie",
+        "hero-subtitle": "Entdecken Sie jede Ecke Ihres nächsten Ferienhauses",
+        "hero-photos": "Kristallklare Details",
+        "hero-rooms": "Eine Komplette Tour",
+        "gallery-title": "Erkunden Sie Casa Gianna",
+        "gallery-subtitle": "Jedes Foto erzählt die Geschichte Ihres perfekten Aufenthalts am Meer",
+        "features-title": "Einzigartige Merkmale",
+        "features-subtitle": "Details, die den Unterschied machen",
+        "feature-beach-title": "Nahe dem Meer",
+        "feature-beach-desc": "200 Meter vom Strand Lido delle Nazioni entfernt",
+        "feature-garden-title": "Privater Garten",
+        "feature-garden-desc": "Grünflächen für Entspannung und Privatsphäre",
+        "feature-rooms-title": "Komfortable Zimmer",
+        "feature-rooms-desc": "Sorgfältig eingerichtete und helle Räume",
+        "feature-kitchen-title": "Vollständige Küche",
+        "feature-kitchen-desc": "Moderne und funktionale Geräte",
+        "contact-title": "Gefällt Ihnen was Sie sehen?",
+        "contact-subtitle": "Buchen Sie jetzt Ihren Traumurlaub",
+        "contact-whatsapp": "WhatsApp",
+        "contact-whatsapp-desc": "Sofortige Antwort",
+        "contact-whatsapp-action": "Chatten Sie mit uns",
+        "contact-email": "E-Mail",
+        "contact-email-desc": "Detaillierte Anfrage",
+        "contact-email-action": "E-Mail schreiben",
+        "contact-location": "Standort",
+        "contact-location-desc": "Auf Maps anzeigen",
+        "contact-location-action": "Maps öffnen",
+        "footer-location": "Lido delle Nazioni, Comacchio (FE), Italien",
+        "footer-rights": "Alle Rechte vorbehalten",
+        "contact-card-title": "Giannas Kontakte",
+        "contact-person-name": "Gianna Santececca",
+        "contact-person-phone": "Telefono:",
+        "contact-person-whatsapp": "WhatsApp:",
+        "contact-person-email": "E-Mail:",
+        "gallery-img-1": "Außenansicht Casa Gianna",
+        "gallery-img-2": "Haupteingang",
+        "gallery-img-3": "Schlafzimmer mit Bücherregal",
+        "gallery-img-4": "Helles Wohnzimmer",
+        "gallery-img-5": "Entspannungsbereich",
+        "gallery-img-6": "Privatparkplatz",
+        "gallery-img-7": "Ess- und Küchenbereich",
+        "gallery-img-8": "Zweites Schlafzimmer",
+        "gallery-img-9": "Hinterer Garten",
+        "gallery-img-10": "Außendusche",
+        "gallery-img-11": "Hintere Terrasse",
+        "gallery-img-12": "Entfernung zum Meer"
+      }
     };
 
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
-      if (imageModal.classList.contains('hidden')) return;
-      if (e.key === 'Escape') closeModal();
-      if (e.key === 'ArrowRight') nextImage();
-      if (e.key === 'ArrowLeft') prevImage();
-    });
+    function setLanguage(lang) {
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-key]').forEach(element => {
+        const key = element.dataset.key;
+        if (translations[lang] && translations[lang][key]) {
+          element.textContent = translations[lang][key];
+        }
+      });
+      if (contactModal.classList.contains('show')) {
+          document.querySelector('#contactModal [data-key="contact-person-name"]').textContent = translations[lang]["contact-person-name"];
+      }
+      createGalleryItems();
+      
+      // Sincronizza i selettori
+      if(languageSelect) languageSelect.value = lang;
+      if(mobileLanguageSelect) mobileLanguageSelect.value = lang;
+      
+      localStorage.setItem('selectedLanguage', lang);
+    }
 
-    // Mobile menu functionality (Uniformata a prezzario.html)
-    const mobileMenuButton = document.getElementById('mobile-menu-button');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const closeMobileMenu = document.getElementById('close-mobile-menu');
+    // Gestione cambio lingua
+    languageSelect.addEventListener('change', (e) => setLanguage(e.target.value));
+    mobileLanguageSelect.addEventListener('change', (e) => setLanguage(e.target.value));
 
-    mobileMenuButton.addEventListener('click', () => {
-      mobileMenu.classList.remove('hidden');
-      setTimeout(() => {
-        mobileMenu.classList.add('translate-y-0');
-        mobileMenu.classList.remove('-translate-y-full');
-      }, 10);
-    });
+    const savedLang = localStorage.getItem('selectedLanguage') || localStorage.getItem('lang');
+    const userLang = (navigator.language || navigator.userLanguage || 'it').split('-')[0];
+    const initialLang = savedLang || (translations[userLang] ? userLang : 'it');
 
-    closeMobileMenu.addEventListener('click', () => {
-      mobileMenu.classList.remove('translate-y-0');
-      mobileMenu.classList.add('-translate-y-full');
-      setTimeout(() => {
-        mobileMenu.classList.add('hidden');
-      }, 300);
-    });
-
-    // Inizializzazione
-    document.getElementById('current-year').textContent = new Date().getFullYear();
-    const initialLang = languageSelect.value || 'it';
     setLanguage(initialLang);
+
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // --- NUOVA LOGICA MENU MOBILE (SIMILE A PREZZARIO) ---
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+
+    function openMobileMenu(){
+      mobileMenu.classList.add('show');
+      mobileOverlay.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu(){
+      mobileMenu.classList.remove('show');
+      mobileOverlay.classList.remove('show');
+      document.body.style.overflow = 'auto';
+    }
+    function closeMobileMenuIfOpen(){ if(mobileMenu.classList.contains('show')) closeMobileMenu(); }
+
+    if(menuBtn){
+      menuBtn.addEventListener('click', () => {
+        if(mobileMenu.classList.contains('show')) closeMobileMenu(); else openMobileMenu();
+      });
+    }
+    if(mobileOverlay){
+      mobileOverlay.addEventListener('click', closeMobileMenu);
+    }
+
+    // Chiude il menu quando si clicca su un link
+    mobileMenu.querySelectorAll('a').forEach(el => {
+      el.addEventListener('click', () => setTimeout(closeMobileMenu, 60));
+    });
+
   </script>
 </body>
 </html>
